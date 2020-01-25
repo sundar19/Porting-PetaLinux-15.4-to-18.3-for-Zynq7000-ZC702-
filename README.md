@@ -13,3 +13,5 @@ For Building your own OS,
 2.Replace the existing system-user.dtsi with the file provided and rebuild
 
 Then you have petalinux 18.3 working in your ZC702 board
+
+You might have to purchase Xylon LogiCVC framebuffer and get the patch file for kernel from them
