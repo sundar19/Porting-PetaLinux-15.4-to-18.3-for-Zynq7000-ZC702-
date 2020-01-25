@@ -9,6 +9,6 @@ For Building your own OS,
 
 1.build using the given .hdf & .bit file with your petalinux
 
-2.Replace the existing system-user.dtsi with the file provided
+2.Replace the existing system-user.dtsi with the file provided and rebuild
 
 Then you have petalinux 18.3 working in your ZC702 board
