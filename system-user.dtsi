@@ -1,0 +1,355 @@
+/include/ "system-conf.dtsi"
+/{
+};
+&i2c0 {
+        status = "okay";
+        clock-frequency = <400000>;
+        i2cswitch@74 {
+        compatible = "nxp,pca9544";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x74>;
+        i2c@2{
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <2>;
+            si570: clock-generator@5d {
+                #clock-cells = <0>;
+                compatible = "silabs,si570";
+                temperature-stability = <50>;
+                reg = <0x5d>;
+                factory-fout = <156250000>;
+                clock-frequency = <148500000>;
+            };
+        };
+        i2c@0 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0>;
+            adv7511: hdmi-tx@39 {
+                compatible = "adi,adv7511";
+                reg = <0x39>;
+                adi,input-depth = <8>;
+                adi,input-colorspace = "yuv422";
+                adi,input-clock = "1x";
+                adi,input-style = <3>;
+                adi,input-justification = "right";
+                dma-request = <&logicvc_0>;
+                edid-addr = <0x50>;
+                video-input {
+                    input-id = <1>;
+                    input-style = <3>;
+                    input-color-depth = <8>;
+                    bit-justification = <1>;
+                    hsync-polarity = <0>;
+                    vsync-polarity = <0>;
+                    clock-delay = <3>;
+                };
+                video-output {
+                    hdmi-mode = <0>;
+                    output-format = <0>;
+                    output-color-space = <0>;
+                    up-conversion = <0>;
+                    csc-enable = <1>;
+                    csc-scaling-factor = <2>;
+                    csc-coefficients {
+                        a1 = <0x0B37>;
+                        a2 = <0x0800>;
+                        a3 = <0x0000>;
+                        a4 = <0x1A86>;
+                        b1 = <0x1A49>;
+                        b2 = <0x0800>;
+                        b3 = <0x1D3F>;
+                        b4 = <0x0422>;
+                        c1 = <0x0000>;
+                        c2 = <0x0800>;
+                        c3 = <0x0E2D>;
+                        c4 = <0x1914>;
+                    };
+                };
+            };
+        }; 
+    };
+};
+/delete-node/ &tpg_input_v_tpg_1;
+/delete-node/ &tpg_input_axi_vdma_3;
+/delete-node/ &tpg_input_v_tc_1;
+/delete-node/ &hdmi_output_logicvc_1;
+/delete-node/ &fmc_hdmi_input_axi_vdma_1;
+/include/ "/home/sundar/v2_success/components/plnx_workspace/device-tree/device-tree/pl.dtsi"
+/ {
+    amba_pl:amba_pl{
+        axi_iic_1:i2c@40040000  {
+                        #address-cells = <1>;
+            #size-cells = <0>;
+            clock-names = "s_axi_aclk";
+            clocks = <&misc_clk_0>;
+            compatible = "xlnx,axi-iic-2.0", "xlnx,xps-iic-2.00.a";
+            interrupt-names = "iic2intc_irpt";
+            interrupt-parent = <&intc>;
+            interrupts = <0 30 4>;
+            reg = <0x40040000 0x10000>;
+                i2cswitch@74 {
+                   compatible = "nxp,pca9544";
+                   #address-cells = <1>;
+                   #size-cells = <0>;
+                   reg = <0x74>;
+                           reset-gpios = <&gpio0 54 1>;
+   
+                            i2c@1 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <2>;
+                                adv7611:adv7611@4c {
+                compatible = "adi,adv7611";
+                reg = <0x4c>; 
+                                reset-gpios = <&pca9534 0 1>;
+                hpd-gpios = <&pca9534 2 0>;
+                #address-cells = <0x1>;
+                #size-cells = <0x0>;
+                port@0 {
+                    reg = <0x0>;
+                };
+                port@1 {
+                    reg = <0x1>;
+                    adv7611_out: endpoint {
+                        remote-endpoint = <&vcap_hdmi_in>;
+                    };
+                 };
+                 };
+        
+                           };
+ 
+                    i2c@3 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <3>;
+    
+                pca9534: gpio@20 {
+                    compatible = "nxp,pca9534";
+                    reg = <0x20>;
+                    gpio-controller;
+                    #gpio-cells = <2>;
+                      };
+                   };
+                        };
+                 };
+    tpg_input_v_tc_1: v_tc@40070000 {
+            compatible = "xlnx,v-tc-6.1", "xlnx,v-tc-6.1";
+            reg = <0x40070000 0x10000>;
+            clocks = <&misc_clk_2>, <&misc_clk_0>;
+            clock-names = "clk", "s_axi_aclk";
+            xlnx,generator ;
+        };
+    tpg_input_v_tpg_1: v_tpg@40080000 {
+            compatible ="xlnx,v-tpg-7.0", "xlnx,v-tpg-5.0";
+            reg = <0x40080000 0x10000>;
+            clocks = <&misc_clk_1>;
+            clock-names = "ap_clk";
+            xlnx,vtc = <&tpg_input_v_tc_1>;
+            reset-gpios = <&gpio0 56 1>;
+            xlnx,s-axi-ctrl-addr-width = <8>;
+            xlnx,s-axi-ctrl-data-width = <32>;
+            tpg_ports: ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+            port@0 {
+                reg = <0>;
+                xlnx,video-format = <0>;
+                xlnx,video-width = <8>;
+                tpg_out: endpoint {
+                    remote-endpoint = <&vcap_tpg_in>;
+                        };
+                    };
+                };
+            };
+    
+        
+    tpg_input_axi_vdma_3: dma@40020000 {
+            compatible = "xlnx,axi-vdma-6.3", "xlnx,axi-vdma-1.00.a";
+            #dma-cells = <1>;
+            reg = <0x40020000 0x10000>;
+            dma-ranges = <0x00000000 0x00000000 0x40000000>;
+            xlnx,num-fstores = <0x1>;
+            xlnx,flush-fsync = <0x1>;
+            clocks = <&misc_clk_0>, <&misc_clk_1>, <&misc_clk_1>;
+            clock-names = "s_axi_lite_aclk", "m_axi_s2mm_aclk", "s_axis_s2mm_aclk";
+            interrupt-names = "s2mm_introut";
+            interrupt-parent = <&intc>;
+            interrupts = <0 33 4>;
+            xlnx,addrwidth = <0x20>;
+            dma-channel@40090000 {
+                compatible = "xlnx,axi-vdma-s2mm-channel";
+                interrupts = <0 33 4>;
+                xlnx,datawidth = <0x10>;
+                xlnx,device-id = <0x2>;
+                xlnx,genlock-mode ;
+            
+                        };
+                    };
+    vcap_tpg {
+        compatible = "xlnx,video";
+        dmas = <&tpg_input_axi_vdma_3 1>;
+        dma-names = "port0";
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            port@0 {
+                reg = <0>;
+                direction = "input";
+                vcap_tpg_in: endpoint {
+                    remote-endpoint = <&tpg_out>;
+                                    };
+                                };
+                            };          
+                        };  
+fmc_hdmi_input_axi_vdma_1: dma@40090000 {
+            #dma-cells = <1>;
+            clock-names = "s_axi_lite_aclk", "m_axi_s2mm_aclk", "s_axis_s2mm_aclk";
+            clocks = <&misc_clk_0>, <&misc_clk_1>, <&misc_clk_1>;
+            compatible = "xlnx,axi-vdma-6.3", "xlnx,axi-vdma-1.00.a";
+            interrupt-names = "s2mm_introut";
+            interrupt-parent = <&intc>;
+            interrupts = <0 32 4>;
+            reg = <0x40090000 0x10000>;
+            xlnx,addrwidth = <0x20>;
+            xlnx,flush-fsync = <0x1>;
+            xlnx,num-fstores = <0x1>;
+            dma-channel@40090000 {
+                compatible = "xlnx,axi-vdma-s2mm-channel";
+                interrupts = <0 32 4>;
+                xlnx,datawidth = <0x10>;
+                xlnx,device-id = <0x0>;
+                xlnx,genlock-mode ;
+            };
+        };
+vcap_hdmi {
+        compatible = "xlnx,video";
+        dmas = <&fmc_hdmi_input_axi_vdma_1 1>;
+        dma-names = "port0";
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            port@0 {
+                reg = <0>;
+                direction = "input";
+                vcap_hdmi_in: endpoint {
+                    remote-endpoint = <&adv7611_out>;
+                };
+            };
+        };
+    };
+cvc_fixed_clk_150: cvc_fixed_clk {
+    compatible = "fixed-clock";
+    #clock-cells = <0>;
+    clock-frequency = <148500000>;
+   };  
+logicvc_0: logicvc@40030000 {
+    compatible = "xylon,logicvc-5.00.a";
+    // kern 2016.2 reg = <0x0 0x80030000 0x10000>;
+    reg = <0x40030000 0x10000>;
+    interrupt-parent = <&intc>;
+    interrupts = <0 31 4>;
+    hsync-active-low;
+    vsync-active-low;
+        background-layer-bits-per-pixel = <32>;
+    background-layer-type = "rgb";
+    color-space = <1>;
+        interface = <0>;
+    readable-regs;
+    //size-position;
+    pixel-stride = <2048>;
+    layer_0 {
+        address = <0x30000000>;
+        buffer-offset = <0>;
+        bits-per-pixel = <8>;
+        type = "rgb";
+        transparency = "clut32";
+    };
+    layer_1 {
+        address = <0x31950000>;
+        buffer-offset = <0>;
+        bits-per-pixel = <32>;
+        type = "rgb";
+        transparency = "pixel";
+    };
+/*  layer_2 {
+        address = <0x00000000>;
+        buffer-offset = <1080>;
+        bits-per-pixel = <32>;
+        type = "rgb";
+        transparency = "pixel";
+    };    */
+        display-timings {
+            //native-mode = <&SXGA>;
+            //native-mode = <&hd720p>;
+            native-mode = <&hd1080p>;
+        SXGA: 1280x1024 {
+            clock-frequency = <108000000>;
+            hactive = <1280>;
+            vactive = <1024>;
+            hfront-porch = <48>;
+            hback-porch = <248>;
+            hsync-len = <112>;
+            vfront-porch = <1>;
+            vback-porch = <38>;
+            vsync-len = <3>;
+        };
+        hd720p: 1280x720 {
+            clock-frequency = <74250000>;
+            hactive = <1280>;
+            vactive = <720>;
+            hfront-porch = <110>;
+            hback-porch = <220>;
+            hsync-len = <40>;
+            vfront-porch = <5>;
+            vback-porch = <20>;
+            vsync-len = <5>;
+        };
+        hd1080p: 1920x1080 {
+            clock-frequency = <148500000>;
+            hactive = <1920>;
+            vactive = <1080>;
+            hfront-porch = <88>;
+            hback-porch = <148>;
+            hsync-len = <44>;
+            vfront-porch = <4>;
+            vback-porch = <36>;
+            vsync-len = <5>;
+        };
+    };
+} ; // logicvc_0
+xylon_fb0 {
+    compatible = "xylon,fb-4.00.a";
+    clocks = <&si570>;
+    device = <&logicvc_0>;
+    video-mode = "1920x1080MR";
+    //video-mode = "1280x1024";
+    //video-mode = "800x600";
+    console-layer = <1>;
+    vsync-irq;
+    //edid-video-mode;
+        //edid-print;
+    //put-vscreeninfo-exact;
+   reserved-memory {
+      #address-cells = <1>;
+      #size-cells = <1>;
+      ranges;
+  
+      reserved: buffer@0 {
+         compatible = "shared-dma-pool";
+         device_type = "memory";
+         no-map;
+         reg = <0x0 0x1FFFFFFF>;
+      };
+   };
+  
+   reserved-driver@0 {
+      compatible = "xlnx,reserved-memory";
+      memory-region = <&reserved>;
+   };
+  
+} ;
+    };
+};
+
